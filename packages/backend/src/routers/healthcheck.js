@@ -16,8 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-const { AdvancedBase } = require("@heyputer/puter-js-common");
+"use strict"
+const express = require('express');
+const router = new express.Router();
 
-class ThirdPartyDriversModule extends AdvancedBase {
-    // constructor () {
-}
+// -----------------------------------------------------------------------// 
+// GET /healthcheck
+// -----------------------------------------------------------------------//
+router.get('/healthcheck', async (req, res) => {
+    const svc_serverHealth = req.services.get('server-health');
+
+    const status = await svc_serverHealth.get_status();
+    res.json(status);
+})
+module.exports = router

@@ -51,6 +51,12 @@ router.post('/send-pass-recovery-email', express.json(), body_parser_error_handl
     else if(req.body.email && !validator.isEmail(req.body.email))
         return res.status(400).send('Invalid email.')
 
+    const svc_edgeRateLimit = req.services.get('edge-rate-limit');
+    if ( ! svc_edgeRateLimit.check('send-pass-recovery-email') ) {
+        return res.status(429).send('Too many requests.');
+    }
+
+
     try{
         let user;
         // see if username exists
@@ -108,10 +114,7 @@ router.post('/send-pass-recovery-email', express.json(), body_parser_error_handl
         });
 
         // Send response
-        if(req.body.username)
-            return res.send({message: `Password recovery sent to the email associated with <strong>${user.username}</strong>. Please check your email for instructions on how to reset your password.`});
-        else
-            return res.send({message: `Password recovery email sent to <strong>${user.email}</strong>. Please check your email for instructions on how to reset your password.`});
+	return res.send({message: `If the email address exists in our database. A recovery email will be sent to <strong>${user.email}</strong>`});
 
     }catch(e){
         console.log(e)

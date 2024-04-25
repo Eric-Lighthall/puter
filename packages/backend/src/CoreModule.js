@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-const { AdvancedBase } = require("puter-js-common");
+const { AdvancedBase } = require("@heyputer/puter-js-common");
 const { Context } = require('./util/context');
 
 
@@ -192,6 +192,9 @@ const install = async ({ services, app }) => {
 
     const { SessionService } = require('./services/SessionService');
     services.registerService('session', SessionService);
+
+    const { EdgeRateLimitService } = require('./services/abuse-prevention/EdgeRateLimitService');
+    services.registerService('edge-rate-limit', EdgeRateLimitService);
 }
 
 const install_legacy = async ({ services }) => {

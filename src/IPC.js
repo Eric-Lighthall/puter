@@ -71,7 +71,10 @@ window.addEventListener('message', async (event) => {
 
     // `appInstanceID` is required
     if(!event.data.appInstanceID){
-        console.log(`appInstanceID is needed`);
+        console.error(`appInstanceID is needed`);
+        return;
+    }else if(!window.app_instance_ids.has(event.data.appInstanceID)){
+        console.error(`appInstanceID is invalid`);
         return;
     }
 
@@ -100,7 +103,6 @@ window.addEventListener('message', async (event) => {
     // windowFocused
     //-------------------------------------------------
     else if(event.data.msg === 'windowFocused'){
-        console.log('windowFocused');
     }
     //--------------------------------------------------------
     // ALERT
@@ -165,7 +167,6 @@ window.addEventListener('message', async (event) => {
                 center: event.data.options.center,
                 show_in_taskbar: event.data.options.show_in_taskbar,                    
                 iframe_srcdoc: event.data.options.content,
-                iframe_url: event.data.options.url,
                 parent_uuid: event.data.appInstanceID,
             })
         }
@@ -565,52 +566,6 @@ window.addEventListener('message', async (event) => {
             window.watchItems[event.data.item_uid] = [];
 
         window.watchItems[event.data.item_uid].push(event.data.appInstanceID);
-    }
-    //--------------------------------------------------------
-    // openItem
-    //--------------------------------------------------------
-    else if(event.data.msg === 'openItem'){
-        // check if readURL returns 200
-        $.ajax({
-            url: event.data.metadataURL + '&return_suggested_apps=true&return_path=true',
-            type: 'GET',
-            headers: {
-                "Authorization": "Bearer "+auth_token
-            },
-            success: async function(metadata){
-                $.ajax({
-                    url: api_origin + "/open_item",
-                    type: 'POST',
-                    contentType: "application/json",
-                    data: JSON.stringify({
-                        uid: metadata.uid ?? undefined,
-                        path: metadata.path ?? undefined,
-                    }),
-                    headers: {
-                        "Authorization": "Bearer "+auth_token
-                    },
-                    statusCode: {
-                        401: function () {
-                            logout();
-                        },
-                    },
-                    success: function(open_item_meta){
-                        setTimeout(function(){
-                            launch_app({ 
-                                name: metadata.name, 
-                                file_path: metadata.path,
-                                app_obj: open_item_meta.suggested_apps[0],
-                                window_title: metadata.name,
-                                file_uid: metadata.uid,
-                                file_signature: open_item_meta.signature,
-                            });
-                        // todo: this is done because sometimes other windows such as openFileDialog
-                        // bring focus to their apps and steal the focus from the newly-opened app
-                        }, 800);
-                    },
-                });            
-            }
-        })
     }
     //--------------------------------------------------------
     // launchApp
